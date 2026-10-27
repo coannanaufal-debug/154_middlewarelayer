@@ -84,7 +84,6 @@ function validatebody(schema) {
 function validateparams(schema) {
     return (req, res, next) => {
         const { error, value } = schema.validate(req.params,{
-            abortEarly: false, convert: true, allowUnknown: false
         });
         if (error) {
             return errorResponse(
@@ -101,3 +100,8 @@ function validateparams(schema) {
         next();
     }
 }
+
+app.get("/", async (req, res) => {
+    const result = await pool.query("SELECT * FROM biodata ORDER BY id ASC");
+    return responseEnvelope(res, "Data berhasil diambil", result.rows);
+})
