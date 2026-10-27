@@ -41,9 +41,9 @@ function responseEnvelope(res, message, data, status = 200) {
     })
 }
 
-function responseEnvelope(res, message, data, status = null) {
+function errorResponse(res, message, status = 500, details = null) {
     return res.status(status).json({
-        success: false, message, data:null, error:details
+        success: false, message, data: null, error: details
     })
 }
 
@@ -51,7 +51,7 @@ function responseEnvelope(res, message, data, status = null) {
 const biodataSchema = Joi.object({
     id: Joi.number().integer().positive(),
     nama: Joi.string().trim().min(2).max(100).required(),
-    id: Joi.string().trim().min(5).max(20).required(),
+    nim: Joi.string().trim().min(5).max(20).required(),
     kelas: Joi.string().trim().min(1).max(20).required(),
 });
 const idSchema = Joi.object({
@@ -111,7 +111,7 @@ app.post("/biodata", validatebody(biodataSchema), async (req, res) => {
     const result = await pool.query(
         `insert into biodata (id, nama, nim, kelas)
         values ($1, $2, $3, $4)
-        returning *`
+        returning *`,
         [id ?? null, nama, nim, kelas]
     )
     return successResponse(res, "Data berhasil ditambahkan", result.rows[0], 201);
@@ -122,10 +122,10 @@ app.put(
     validateparams(idSchema),
     validatebody(
         biodataSchema
-        .fork( ['nama', 'nim', 'kelas'],field => field.required()
-        .fork(['id'], field => field.forbidden()),
-        ),
-        async (req, res) => {
+        .fork(['nama', 'nim', 'kelas'], field => field.required())
+        .fork(['id'], field => field.forbidden())
+    ),
+    async (req, res) => {
         const { id } = req.params
         const { nama, nim, kelas } = req.body
 
@@ -152,11 +152,10 @@ app.put(
         )
     }
 )
-)
 
 app.delete(
     '/biodata/:id',
-    validateParams(idSchema),
+    validateparams(idSchema),
     async (req, res) => {
         const { id } = req.params
 
