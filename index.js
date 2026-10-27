@@ -178,3 +178,30 @@ app.delete(
         )
     }
 )
+
+//app use
+app.use((req, res) => {
+    return errorResponse(
+        res,
+        'Endpoint tidak ditemukan',
+        404
+    )
+})
+
+app.use((err, req, res, next) => {
+    console.error(err.stack)
+    
+    if (res.headersSent) {
+        return next(err)
+    }
+
+    return errorResponse(
+        res,
+        'Terjadi kesalahan pada server',
+        500,
+    )
+})
+
+app.listen(port, () => {
+    console.log(`App running on port ${port}`)
+})
