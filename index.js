@@ -34,3 +34,5 @@ app.use((req, res, next) => {
     next();
         })
 
+//response envelope
+function responseEnvelope(res, message, data, status = 200) {
